@@ -1,0 +1,41 @@
+{% extends "dashboard/base.html" %}
+{% block title %}
+	Productos
+{% endblock title %}
+{% block content %}
+<style type="text/css">
+	#add {
+	    position: fixed;
+	    display: block;
+	    right: 0;
+	    bottom: 0;
+	    margin-right: 40px;
+	    margin-bottom: 40px;
+	    z-index: 900;
+	}
+</style>
+<div class="mdl-grid">
+	<table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp mdl-cell ">
+	  <thead>
+	    <tr>
+	      <th class="mdl-data-table__cell--non-numeric">Producto</th>
+	      <th>Precio</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	  	{% for producto in object_list %}
+		<tr>
+	      <td class="mdl-data-table__cell--non-numeric"><a href="{% url 'producto_update' pk=producto.pk %}">{{ producto.producto }}</a></td>
+	      <td>${{ producto.precio }}</td>
+	    </tr>    
+		{% empty %}
+		    <li>No articles yet.</li>
+		{% endfor %}
+	    
+	  </tbody>
+	</table>
+</div>
+<a class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp" id="add" href="{% url 'producto_add' %}">
+  <i class="material-icons">add</i>
+</a>
+{% endblock content %}

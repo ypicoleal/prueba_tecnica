@@ -1,0 +1,43 @@
+{% extends "dashboard/base.html" %}
+{% block title %}
+	Clientes
+{% endblock title %}
+{% block content %}
+<style type="text/css">
+	#add {
+	    position: fixed;
+	    display: block;
+	    right: 0;
+	    bottom: 0;
+	    margin-right: 40px;
+	    margin-bottom: 40px;
+	    z-index: 900;
+	}
+</style>
+<div class="mdl-grid">
+	<table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp mdl-cell ">
+	  <thead>
+	    <tr>
+	      <th class="mdl-data-table__cell--non-numeric">Nombres</th>
+	      <th class="mdl-data-table__cell--non-numeric">Documento</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	  	{% for cliente in object_list %}
+		<tr>
+	      <td class="mdl-data-table__cell--non-numeric"><a href="{% url 'cliente_update' pk=cliente.pk %}">{{ cliente.nombres }}</a></td>
+	      <td class="mdl-data-table__cell--non-numeric">{{ cliente.documento }}</td>
+	    </tr>    
+		{% empty %}
+		<tr>
+	      <td class="mdl-data-table__cell--non-numeric" colspan="2">0 Clientes registrados</td>
+	    </tr>
+		{% endfor %}
+	    
+	  </tbody>
+	</table>
+</div>
+<a class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp" id="add" href="{% url 'cliente_add' %}">
+  <i class="material-icons">add</i>
+</a>
+{% endblock content %}

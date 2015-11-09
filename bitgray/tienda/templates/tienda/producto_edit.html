@@ -1,0 +1,60 @@
+{% extends "dashboard/base.html" %}
+{% block title %}
+	Productos
+{% endblock title %}
+{% block content %}
+	<style type="text/css">
+		.send{
+			float: right;
+		}
+		.delete{
+			float: left;
+			background: #de3226;
+			color: #fff !important;
+		}
+	</style>
+	<form action="" method="post">
+		{% csrf_token %}
+		{% for hidden in form.hidden_fields %}
+		{{ hidden }}
+		{% endfor %}
+	<div class="mdl-grid">
+		<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--10-col">
+			<div class="mdl-card__title mdl-card--border">
+				<h2 class="mdl-card__title-text">Editar Producto</h2>
+			</div>
+			<div class="mdl-card__supporting-text">
+				<div class="mdl-grid">
+				{% for field in form.visible_fields  %}
+				{% if field.errors %}
+					<style type="text/css">
+						#{{ field.id_for_label }}{
+							border-color: #de3226;
+    						box-shadow: none;
+						}
+						label[for="{{ field.id_for_label }}"]{
+							color: #de3226;
+    						font-size: 12px;
+						}
+					</style>
+				{% endif %}
+					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+						{{ field}}
+						<label class="mdl-textfield__label" for="{{ field.id_for_label }}" >{{ field.label }}</label>
+						{% for error in field.errors %}<span class="mdl-textfield__error" style="visibility: visible;">{{error}}</span>{% endfor %}
+					</div>
+				{% endfor %}
+				</div>
+			</div>
+			<div class="mdl-card__actions mdl-card--border">
+				<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect delete" href="{% url 'producto_delete' pk=object.pk %}">
+      				Eliminar
+    			</a>
+				<button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect send">
+					Enviar
+				</button>
+			</div>
+		</div>
+	</div>
+	</form>
+{% endblock content %}

@@ -1,0 +1,47 @@
+{% extends "dashboard/base.html" %}
+{% block title %}
+	Compras
+{% endblock title %}
+{% block content %}
+<style type="text/css">
+	#add {
+	    position: fixed;
+	    display: block;
+	    right: 0;
+	    bottom: 0;
+	    margin-right: 40px;
+	    margin-bottom: 40px;
+	    z-index: 900;
+	}
+</style>
+<div class="mdl-grid">
+	<table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp mdl-cell ">
+	  <thead>
+	    <tr>
+	    	<th class="mdl-data-table__cell--non-numeric">Cliente</th>
+	    	<th class="mdl-data-table__cell--non-numeric">Sede</th>
+	    	<th class="mdl-data-table__cell--non-numeric">Producto</th>
+	    	<th>Precio</th>
+	    	<th class="mdl-data-table__cell--non-numeric">Fecha</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	  	{% for compra in object_list %}
+		<tr>
+	      <td class="mdl-data-table__cell--non-numeric"><a href="{% url 'compra_update' pk=compra.pk %}">{{ compra.cliente }}</a></td>
+	      <td class="mdl-data-table__cell--non-numeric">{% if compra.sede %}{{ compra.sede }}{% else %}Sin sede{% endif %}</td>
+	      <td class="mdl-data-table__cell--non-numeric">{{ compra.producto }}</td>
+	      <td>${% if compra.precio %}{{ compra.precio }}{% else %}{{ compra.producto.precio }}{% endif %}</td>
+	      <td class="mdl-data-table__cell--non-numeric">{{ compra.fecha }}</td>
+	    </tr>    
+		{% empty %}
+		    <li>No articles yet.</li>
+		{% endfor %}
+	    
+	  </tbody>
+	</table>
+</div>
+<a class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp" id="add" href="{% url 'compra_add' %}">
+  <i class="material-icons">add</i>
+</a>
+{% endblock content %}

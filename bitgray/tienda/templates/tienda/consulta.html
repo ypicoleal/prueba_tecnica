@@ -1,0 +1,114 @@
+{% extends "dashboard/base.html" %}
+{% block title %}
+	Compras del cliente
+{% endblock title %}
+{% block content %}
+	<style type="text/css">
+		.send{
+			float: right;
+		}
+		.delete{
+			float: left;
+			background: #de3226;
+			color: #fff !important;
+		}
+		table, th, td {
+		    border: 1px solid black;
+		    border-collapse: collapse;
+		    padding: 5px;
+		}
+	</style>
+	<form action="" method="post">
+		{% csrf_token %}
+		{% for hidden in form.hidden_fields %}
+		{{ hidden }}
+		{% endfor %}
+	<div class="mdl-grid">
+		<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--6-col">
+			<div class="mdl-card__title mdl-card--border">
+				<h2 class="mdl-card__title-text">Consultar cliente</h2>
+			</div>
+			<div class="mdl-card__supporting-text">
+				<div class="mdl-grid">
+				{% if error %}
+					<style type="text/css">
+						#documento{
+							border-color: #de3226;
+    						box-shadow: none;
+						}
+						label[for="documento"]{
+							color: #de3226;
+    						font-size: 12px;
+						}
+					</style>
+				{% endif %}
+					<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+						<input class="mdl-textfield__input" id="documento" name="documento" type="text" {% if documento %}value="{{documento}}"{% endif %}/>
+						<label class="mdl-textfield__label" for="documento" >Documento</label>
+						{% if error %}<span class="mdl-textfield__error" style="visibility: visible;">el cliente no existe</span>{% endif %}
+					</div>
+				</div>
+			</div>
+			<div class="mdl-card__actions mdl-card--border">
+				<button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect send">
+					Buscar
+				</button>
+			</div>
+		</div>
+		{% if compras %}
+		<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--10-col">
+			<div class="mdl-card__title mdl-card--border">
+				<h2 class="mdl-card__title-text">Resultado</h2>
+			</div>
+			<div class="mdl-card__supporting-text">
+				<table style="width:100%" >
+					<thead>
+						<tr>
+							<td colspan="2">Documento:{{cliente.documento}}</td>
+							<td colspan="2">Nombres:{{cliente.nombres}}</td>
+						</tr>
+						<tr>
+							<td>id productos</td>
+							<td>producto</td>
+							<td>sede</td>
+							<td>precio</td>
+						</tr>
+					</thead>
+					<tbody>
+						{% for compra in compras %}
+						<tr>
+							<td>{{compra.producto.id}}</td>
+							<td>{{compra.producto.producto}}</td>
+							<td>{% if compra.sede %}{{compra.sede}}{% endif %}</td>
+							<td>${{ compra.subtotal }}</td>
+						</tr>
+						{% endfor %}
+						<tr>
+							<td colspan="3" align="right">Total precio</td>
+							<td>${{total.total}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="mdl-card__actions mdl-card--border">
+				<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect send" href="{% url 'cliente_compras_pdf' pk=cliente.pk %}">
+					Exportar a PDF
+				</a>
+				<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect send" href="{% url 'cliente_compras_json' pk=cliente.pk %}">
+					Obtener JSON
+				</a>
+			</div>
+		</div>
+		{% elif compras != None and not error %}
+			<div class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--10-col">
+			<div class="mdl-card__title mdl-card--border">
+				<h2 class="mdl-card__title-text">Resultado</h2>
+			</div>
+			<div class="mdl-card__supporting-text">
+				No se encontraron compras para este cliente
+			</div>
+		</div>
+		{% endif %}
+	</div>
+	</form>
+{% endblock content %}

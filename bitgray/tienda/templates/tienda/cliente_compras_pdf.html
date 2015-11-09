@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Compras de cliente</title>
+        <style type="text/css">
+            @page {
+                size: {{ pagesize }};
+                margin: 1cm;
+                @frame footer {
+                    -pdf-frame-content: footerContent;
+                    bottom: 0cm;
+                    margin-left: 9cm;
+                    margin-right: 9cm;
+                    height: 1cm;
+                }
+            }
+            table, th, td {
+                border: 1px solid black;
+                border-collapse: collapse;
+                padding: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <table style="width:100%" >
+                <thead>
+                    <tr>
+                        <td colspan="2">Documento:{{cliente.documento}}</td>
+                        <td colspan="2">Nombres:{{cliente.nombres}}</td>
+                    </tr>
+                    <tr>
+                        <td>id productos</td>
+                        <td>producto</td>
+                        <td>sede</td>
+                        <td>precio</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for compra in compras %}
+                    <tr>
+                        <td>{{compra.producto.id}}</td>
+                        <td>{{compra.producto.producto}}</td>
+                        <td>{% if compra.sede %}{{compra.sede}}{% endif %}</td>
+                        <td>${{ compra.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3" align="right">Total precio</td>
+                        <td>${{total.total}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>
