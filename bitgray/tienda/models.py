@@ -19,7 +19,7 @@ class Producto(models.Model):
 class Cliente(models.Model):
 	documento = models.IntegerField(unique=True)
 	nombres = models.CharField(max_length=80)
-	detalles = models.TextField()
+	detalles = models.TextField(null=True, blank=True)
 
 	def __unicode__(self):
 		return unicode(self.nombres)
@@ -44,11 +44,11 @@ class Sede(models.Model):
 #end class
 
 class Compra(models.Model):
-	cliente = models.ForeignKey(Cliente)
-	producto = models.ForeignKey(Producto)
+	cliente = models.ForeignKey(Cliente, null=True, blank=True)
+	producto = models.ForeignKey(Producto, null=True, blank=True)
 	sede = models.ForeignKey(Sede, null=True, blank=True)
 	precio = models.IntegerField(null=True, blank=True)
-	descripcion = models.TextField()
+	descripcion = models.TextField(null=True, blank=True)
 	fecha = models.DateTimeField(auto_now_add=True)
 
 	def __unicode__(self):

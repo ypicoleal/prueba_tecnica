@@ -31,4 +31,7 @@ urlpatterns = [
 	url(r'consulta/$', views.consulta, name='consulta'),
 	url(r'cliente/(?P<pk>[0-9]+)/compras.pdf$', views.cliente_pdf, name='cliente_compras_pdf'),
 	url(r'cliente/(?P<pk>[0-9]+)/compras.json$', views.cliente_json, name='cliente_compras_json'),
+
+	#mailer
+	url(r'^mailer/$', views.mailer, name='mailer'),
 ]

@@ -1,5 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from django.db.models import Case, Value, When, Sum
+from django.core.mail import get_connection, EmailMultiAlternatives
+from django.db import connection
+from django.db.models import Case, Value, When, Sum, F, Avg, Max, Min, Count, Q
+from django.db.models.expressions import RawSQL
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.core.urlresolvers import reverse_lazy
@@ -12,6 +15,7 @@ from cgi import escape
 import json
 import forms
 import models
+from bitgray import settings
 
 # Create your views here.
 def home(request):
@@ -119,7 +123,7 @@ def consulta(request):
 	error = False
 	if request.method == 'POST' and request.POST.get('documento', False):
 		documento = request.POST.get('documento', False)
-		compras = models.Compra.objects.filter(cliente__documento=documento).annotate(subtotal=Case(When(precio=None, then='producto__precio'), default='precio'))
+		compras = models.Compra.objects.filter(cliente__documento=documento).exclude(producto=None).annotate(subtotal=Case(When(precio=None, then='producto__precio'), default='precio'))
 		total = compras.aggregate(total=Sum('subtotal'))
 		cliente = models.Cliente.objects.filter(documento=documento).first()
 		error = cliente is None
@@ -142,7 +146,7 @@ def render_to_pdf(template_src, context_dict):
 
 def cliente_pdf(request,pk):
 	cliente = get_object_or_404(models.Cliente, pk=pk)
-	compras = models.Compra.objects.filter(cliente=cliente).annotate(subtotal=Case(When(precio=None, then='producto__precio'), default='precio'))
+	compras = models.Compra.objects.filter(cliente=cliente).exclude(producto=None).annotate(subtotal=Case(When(precio=None, then='producto__precio'), default='precio'))
 	total = compras.aggregate(total=Sum('subtotal'))
 	return render_to_pdf(
 		'tienda/cliente_compras_pdf.html',
@@ -157,7 +161,7 @@ def cliente_pdf(request,pk):
 
 def cliente_json(request,pk):
 	cliente = get_object_or_404(models.Cliente, pk=pk)
-	compras = models.Compra.objects.filter(cliente=cliente).annotate(subtotal=Case(When(precio=None, then='producto__precio'), default='precio'))
+	compras = models.Compra.objects.filter(cliente=cliente).exclude(producto=None).annotate(subtotal=Case(When(precio=None, then='producto__precio'), default='precio'))
 	total = compras.aggregate(total=Sum('subtotal'))
 	compras = [{
 		'id_productos':compra.producto.pk,
@@ -172,7 +176,7 @@ def cliente_json(request,pk):
 		'compras': compras,
 		'total': total['total']
 	}
-	return HttpResponse(json.dumps(data), content_type='aplication/json')
+	return HttpResponse(json.dumps(data), content_type='application/json')
 #end def
 
 def print_or_none(object):
@@ -181,4 +185,28 @@ def print_or_none(object):
 	else:
 		return None
 	#end if
+#end def
+
+def mailer(request):
+	#data = models.Compra.objects.annotate(diferencia=(Case(When(precio=None, then=0), default=F('producto__precio') - F('precio')))).values('diferencia', 'precio', 'producto__precio')
+	data = models.Compra.objects.exclude(producto=None).aggregate(
+		diferencia_avg=Avg(Case(When(precio=None, then=0), default=F('producto__precio') - F('precio'))),
+		diferencia_max=Max(Case(When(precio=None, then=0), default=F('producto__precio') - F('precio'))),
+		diferencia_mim=Min(Case(When(precio=None, then=0), default=F('producto__precio') - F('precio'))),
+		ganacias=Sum(Case(When(precio=None, then='producto__precio'), default='precio'))
+	)
+	data = dict(data)
+	data['compras_por_min'] = compras_por_min()
+	subject, from_email, to = 'Reporte semanal', settings.EMAIL_HOST_USER, settings.EMAIL_DESTINO
+	text_content = 'Este es el reporte semanal de la tienda bitgray \n\n-diferencia promedio: %s \n-diferencia maxima: %s \n-diferencia minima: %s \n-ganacias: %s \n-promedio de ventas por minuto: %s' % (data['diferencia_avg'], data['diferencia_max'], data['diferencia_mim'], data['ganacias'], data['compras_por_min'])
+	msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+	msg.send()
+	return HttpResponse("ok")
+#end def
+
+def compras_por_min():
+	cursor = connection.cursor()
+	cursor.execute('select avg(num) as promedio from (SELECT date_format(fecha, "%Y-%m-%d %H:%i") as fecha_f, count(id) as num FROM tienda_compra group by fecha_f) as t')
+	row = cursor.fetchone()
+	return float(row[0])
 #end def
